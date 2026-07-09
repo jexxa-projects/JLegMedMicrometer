@@ -37,15 +37,15 @@
     <image.directory>jlegmedmicrometer</image.directory>
 
     <!-- version of dependencies -->
-    <jlegmed.core.version>5.4.2</jlegmed.core.version>
-    <activemq.artemis.client.version>2.54.0</activemq.artemis.client.version>
-    <postgres.version>42.7.11</postgres.version>
+    <jlegmed.core.version>5.4.4</jlegmed.core.version>
+    <activemq.artemis.client.version>2.55.0</activemq.artemis.client.version>
+    <postgres.version>42.7.13</postgres.version>
     <slf4j.simple.version>2.0.18</slf4j.simple.version>
 
     <!-- version of test dependencies -->
-    <junit.platform.launcher.version>6.1.0</junit.platform.launcher.version>
-    <junit.jupiter.engine.version>6.1.0</junit.jupiter.engine.version>
-    <junit.jupiter.params.version>6.1.0</junit.jupiter.params.version>
+    <junit.platform.launcher.version>6.1.1</junit.platform.launcher.version>
+    <junit.jupiter.engine.version>6.1.1</junit.jupiter.engine.version>
+    <junit.jupiter.params.version>6.1.1</junit.jupiter.params.version>
     <awaitility.version>4.3.0</awaitility.version>
     <unirest.java.version>3.14.5</unirest.java.version>
 
