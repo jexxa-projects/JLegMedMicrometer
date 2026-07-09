@@ -1,0 +1,40 @@
+version: "3.7"
+
+services:
+
+  JLegMedMicrometer:
+    image: ghcr.io/jexxa-projects/jlegmedmicrometer/jlegmedmicrometer:latest
+    stop_grace_period: 60s
+    ports:
+      - "7508:7500" # Optional: Adjust HTTP Port "<free HTTP-Port>:7500"
+    depends_on:
+      - ActiveMQ
+      - Postgres
+
+  
+  ActiveMQ:
+    image: quay.io/artemiscloud/activemq-artemis-broker:latest
+    environment:
+      AMQ_USER: admin
+      AMQ_PASSWORD: admin
+      AMQ_EXTRA_ARGS: --relax-jolokia
+
+  Postgres:
+    image: postgres:18
+    stop_grace_period: 120s
+    user: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+    environment:
+      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: postgres
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
