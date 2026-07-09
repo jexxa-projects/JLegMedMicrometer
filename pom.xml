@@ -99,17 +99,11 @@
     </dependency>
 
     <dependency>
-      <groupId>org.postgresql</groupId>
-      <artifactId>postgresql</artifactId>
-      <version>${postgres.version}</version>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-core</artifactId>
+      <version>1.17.0</version>
+      <scope>compile</scope>
     </dependency>
-
-    <dependency>
-      <groupId>org.apache.activemq</groupId>
-      <artifactId>artemis-jms-client</artifactId>
-      <version>${activemq.artemis.client.version}</version>
-    </dependency>
-
 
     <!-- Dependencies required for tests -->
     <dependency>
