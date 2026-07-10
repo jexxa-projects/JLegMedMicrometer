@@ -50,6 +50,22 @@ To organize our code, we recommend the following package structure. Since messag
  
 ```
 
-### Cleanup Readme
+### Tests
 
-After successfully setting up your new project, you should clean up the text of README as described [here](https://www.makeareadme.com)    
+#### Im Container 
+$ wget -O - http://localhost:8080/metrics/
+Connecting to localhost:8080 ([::1]:8080)
+writing to stdout
+# HELP hello_world_total
+# TYPE hello_world_total counter
+hello_world_total 340.0
+-                    100% |*************************************************************************************************************************************|    84  0:00:00 ETA
+written to stdout
+ -> Stats werden geliefert 
+#### Local 
+curl -fLk http://localhost/micrometer/metrics
+
+# HELP hello_world_total
+# TYPE hello_world_total counter
+hello_world_total 760.0
+==> OK

@@ -1,40 +1,31 @@
-version: "3.7"
+version: "3.8"
 
 services:
+  HelloMicrometer:
+    image: ghcr.io/jexxa-projects/jlegmedmicrometer/jlegmedmicrometer:0.latest
 
-  JLegMedMicrometer:
-    image: ghcr.io/jexxa-projects/jlegmedmicrometer/jlegmedmicrometer:latest
-    stop_grace_period: 60s
-    ports:
-      - "7508:7500" # Optional: Adjust HTTP Port "<free HTTP-Port>:7500"
-    depends_on:
-      - ActiveMQ
-      - Postgres
+    networks:
+      - public-digilab
 
-  
-  ActiveMQ:
-    image: quay.io/artemiscloud/activemq-artemis-broker:latest
-    environment:
-      AMQ_USER: admin
-      AMQ_PASSWORD: admin
-      AMQ_EXTRA_ARGS: --relax-jolokia
+    deploy:
+      labels:
+        # Enable traefic routing
+        - traefik.enable=true
+        - traefik.swarm.network=public-digilab
 
-  Postgres:
-    image: postgres:18
-    stop_grace_period: 120s
-    user: postgres
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
+        # Configure routing for micrometer
+        - traefik.http.routers.micrometer.tls=true
+        - traefik.http.routers.micrometer.entrypoints=websecure
 
-    environment:
-      POSTGRES_PASSWORD: admin
-      POSTGRES_USER: postgres
+        - traefik.http.routers.micrometer.rule=PathPrefix(`/micrometer`)
+        - traefik.http.routers.micrometer.middlewares=micrometer@swarm
 
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+        # Define the middleware micrometer
+        - traefik.http.middlewares.micrometer.stripprefix.prefixes=/micrometer
 
-volumes:
-  postgres-data:
+        # Configure the service
+        - traefik.http.services.micrometer.loadbalancer.server.port=8080 # In docker-swarm we must define the public port of the application this way
+
+networks:
+  public-digilab:
+    external: true
