@@ -69,3 +69,11 @@ curl -fLk http://localhost/micrometer/metrics
 # TYPE hello_world_total counter
 hello_world_total 760.0
 ==> OK
+
+
+#### Dynamic Metrics
+promql
+```
+sum by (app_name) (rate(hello_world_total[$__rate_interval]))
+```
+ -> Stats werden geliefert 
