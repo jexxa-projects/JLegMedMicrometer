@@ -1,0 +1,149 @@
+version: "3.8"
+
+services:
+  grafana:
+    image:  grafana/grafana:latest
+
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        # Enable traefic routing
+        - traefik.enable=true
+
+        # Configure network: Application is only available via this network and not via the public docker-swarm network
+        - traefik.swarm.network=public-digilab
+
+        # Configure routing: Only accept HTTPS-requests (websecure)
+        - traefik.http.routers.monitoring.tls=true
+        - traefik.http.routers.monitoring.entrypoints=websecure
+
+        # Configure routing: Access application via Prefix `monitoring` provided as swarm
+        - traefik.http.routers.monitoring.rule=PathPrefix(`/admin/monitoring`)
+        #- traefik.http.routers.monitoring.middlewares=monitoring@swarm -> Wir haben keine middleware bei Traefik
+
+        # Configure Middleware: Removes `jexxa2` from the URL before forwarding it to application
+        #- traefik.http.middlewares.monitoring.stripprefix.prefixes=/admin/monitoring -> Nicht erforderlich für Grafana -> Wird über seine Config gesetzt
+
+        # Configure the service: # In docker-swarm we must define the public port of the application
+        - traefik.http.services.monitoring.loadbalancer.server.port=3000
+
+
+    volumes:
+      - type: volume
+        source: grafana-data
+        target: /var/lib/grafana
+
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=password
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SMTP_ENABLED=true
+      - GF_SMTP_HOST=mailrelay.shsglobal.de:25
+      - GF_SMTP_FROM_ADDRESS=noreply@dillinger.biz
+      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      - GF_SERVER_ROOT_URL=%(protocol)s://%(domain)s/admin/monitoring/
+      - GF_SERVER_DOMAIN=192.168.178.79
+      - GF_SERVER_PROTOCOL=http
+    networks:
+      - public-digilab
+
+  prometheus:
+    image: prom/prometheus:latest
+    user: "0:0" # Gewährt Lese-/Schreibrechte auf den Docker-Socket
+    command:
+      - '--config.file=/prometheus/prometheus.yml'
+      - '--log.level=error'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=7d'
+    #ports: # Enable for debugging only
+    #  - "9100:9090"
+
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      placement:
+        constraints:
+          - node.role == manager
+    volumes:
+      - type: volume
+        source: prometheus-data
+        target: /prometheus
+      - type: bind
+        source: /var/run/docker.sock
+        target: /var/run/docker.sock
+    networks:
+      - public-digilab
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.52.0
+    command: -logtostderr -docker_only
+    deploy:
+      mode: global
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+    volumes:
+      - type: bind
+        source: /
+        target: /rootfs
+        read_only: true
+      - type: bind
+        source: /var/run
+        target: /var/run
+        read_only: true
+      - type: bind
+        source: /sys
+        target: /sys
+        read_only: true
+      - type: bind
+        source: /var/lib/docker
+        target: /var/lib/docker
+        read_only: true
+    networks:
+      - public-digilab
+
+  node-exporter:
+    image: prom/node-exporter:master
+    command:
+      - '--path.sysfs=/host/sys'
+      - '--path.procfs=/host/proc'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+      - '--no-collector.ipvs'
+    deploy:
+      mode: global
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+    volumes:
+      - type: bind
+        source: /
+        target: /rootfs
+        read_only: true
+      - type: bind
+        source: /proc
+        target: /host/proc
+        read_only: true
+      - type: bind
+        source: /sys
+        target: /host/sys
+        read_only: true
+    networks:
+      - public-digilab
+
+volumes:
+  grafana-data:
+  prometheus-data:
+
+networks:
+  public-digilab:
+    external: true
