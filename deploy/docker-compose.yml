@@ -26,6 +26,10 @@ services:
         # Configure the service
         - traefik.http.services.micrometer.loadbalancer.server.port=8080 # In docker-swarm we must define the public port of the application this way
 
+        - prometheus.scrape=true
+        - prometheus.port=8080
+        - prometheus.app_name=jlegmedmicrometer
+
 networks:
   public-digilab:
     external: true
