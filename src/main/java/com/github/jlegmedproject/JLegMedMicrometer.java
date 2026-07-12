@@ -77,12 +77,14 @@ public final class JLegMedMicrometer
 
         FunctionCounter.builder("flowgraph.messages.total", flowGraph, value -> value.processingStats().handledProcessingErrors().doubleValue())
                 .description("Total handled error messages")
+                .tag("flow_graph", flowGraph.flowGraphID())
                 .tag("result", "error")
                 .tag("error_type", "handled")
                 .register(registry);
 
         FunctionCounter.builder("flowgraph.messages.total", flowGraph, value -> value.processingStats().unhandledProcessingErrors().doubleValue())
                 .description("Total unhandled error messages")
+                .tag("flow_graph", flowGraph.flowGraphID())
                 .tag("result", "error")
                 .tag("error_type", "unhandled")
                 .register(registry);
