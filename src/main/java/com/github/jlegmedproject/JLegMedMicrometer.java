@@ -19,7 +19,7 @@ public final class JLegMedMicrometer
     {
         Javalin app = Javalin
                 .create( JLegMedMicrometer::initJavalin)
-                .start(7070);
+                .start(8080);
 
 
         var jLegMed = new JLegMed(JLegMedMicrometer.class);
