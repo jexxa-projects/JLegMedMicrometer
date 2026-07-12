@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
 
-  <name>JLegMedMicrometer</name>
+  <name>MyJLegMedMicrometer</name>
   <groupId>com.github.jlegmedproject</groupId>
   <artifactId>jlegmedmicrometer</artifactId>
   <version>0.1.6-SNAPSHOT</version>
@@ -37,7 +37,7 @@
     <image.directory>jlegmedmicrometer</image.directory>
 
     <!-- version of dependencies -->
-    <jlegmed.core.version>5.4.4</jlegmed.core.version>
+    <jlegmed.core.version>5.5.0</jlegmed.core.version>
     <activemq.artemis.client.version>2.55.0</activemq.artemis.client.version>
     <postgres.version>42.7.13</postgres.version>
     <slf4j.simple.version>2.0.18</slf4j.simple.version>
@@ -93,30 +93,15 @@
     </dependency>
 
     <dependency>
+      <groupId>io.jexxa.jlegmed</groupId>
+      <artifactId>jlegmed-metrics</artifactId>
+      <version>${jlegmed.core.version}</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>${slf4j.simple.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>io.javalin</groupId>
-      <artifactId>javalin</artifactId>
-      <version>7.2.2</version>
-    </dependency>
-    <dependency>
-      <groupId>io.javalin</groupId>
-      <artifactId>javalin-micrometer</artifactId>
-      <version>7.2.2</version>
-    </dependency>
-    <dependency>
-      <groupId>io.micrometer</groupId>
-      <artifactId>micrometer-core</artifactId>
-      <version>1.17.0</version>
-      <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>io.micrometer</groupId>
-      <artifactId>micrometer-registry-prometheus</artifactId>
-      <version>1.17.0</version>
     </dependency>
 
     <!-- Dependencies required for tests -->
