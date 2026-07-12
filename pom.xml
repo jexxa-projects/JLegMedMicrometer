@@ -97,7 +97,16 @@
       <artifactId>slf4j-simple</artifactId>
       <version>${slf4j.simple.version}</version>
     </dependency>
-
+    <dependency>
+      <groupId>io.javalin</groupId>
+      <artifactId>javalin</artifactId>
+      <version>7.2.2</version>
+    </dependency>
+    <dependency>
+      <groupId>io.javalin</groupId>
+      <artifactId>javalin-micrometer</artifactId>
+      <version>7.2.2</version>
+    </dependency>
     <dependency>
       <groupId>io.micrometer</groupId>
       <artifactId>micrometer-core</artifactId>

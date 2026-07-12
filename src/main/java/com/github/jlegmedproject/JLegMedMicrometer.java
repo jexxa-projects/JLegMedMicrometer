@@ -1,13 +1,12 @@
 package com.github.jlegmedproject;
 
-import com.sun.net.httpserver.HttpServer;
+import io.javalin.Javalin;
+import io.javalin.config.JavalinConfig;
+import io.javalin.micrometer.MicrometerPlugin;
 import io.jexxa.jlegmed.core.JLegMed;
 import io.micrometer.prometheusmetrics.PrometheusConfig;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 
-import java.io.OutputStream;
-import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -16,36 +15,13 @@ public final class JLegMedMicrometer
 {
     static PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
 
-    static void main() throws Exception
+    static void main()
     {
+        Javalin app = Javalin
+                .create( JLegMedMicrometer::initJavalin)
+                .start(7070);
 
-        HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
 
-        server.createContext("/metrics", httpExchange -> {
-            String acceptHeader = httpExchange.getRequestHeaders().getFirst("Accept");
-            String contentType;
-            String response;
-
-            if (acceptHeader != null && acceptHeader.contains("application/openmetrics-text")) {
-                contentType = "application/openmetrics-text; version=1.0.0; charset=utf-8";
-                response = registry.scrape(contentType);
-            } else {
-                // Fallback auf das klassische Prometheus-Text-Format
-                contentType = "text/plain; version=0.0.4; charset=utf-8";
-                response = registry.scrape(contentType);
-            }
-
-            httpExchange.getResponseHeaders().set("Content-Type", contentType);
-
-            byte[] bytes = response.getBytes(StandardCharsets.UTF_8);
-            httpExchange.sendResponseHeaders(200, bytes.length);
-
-            try (OutputStream os = httpExchange.getResponseBody()) {
-                os.write(bytes);
-            }
-        });
-
-        server.start();
         var jLegMed = new JLegMed(JLegMedMicrometer.class);
 
         jLegMed.newFlowGraph("HelloWorld")
@@ -57,6 +33,7 @@ public final class JLegMedMicrometer
                 .and().consumeWith(data -> getLogger(JLegMedMicrometer.class).info(data));
 
         jLegMed.run();
+        app.stop();
     }
 
     public static <T> T incrementCounter(T value)
@@ -65,5 +42,25 @@ public final class JLegMedMicrometer
         counter.increment();
         getLogger(JLegMedMicrometer.class).info("Number of greetings {}", counter.count());
         return value;
+    }
+
+    static void initJavalin(JavalinConfig config)
+    {
+        // Plugins registrieren
+        config.registerPlugin(new MicrometerPlugin(micrometerConfig -> micrometerConfig.registry = registry));
+        config.routes.get("/metrics", ctx -> {
+            String acceptHeader = ctx.header("Accept");
+            if (acceptHeader != null && acceptHeader.contains("application/openmetrics-text")) {
+                // OpenMetrics 1.0.0 Format ausgeben
+                ctx.contentType("application/openmetrics-text; version=1.0.0; charset=utf-8");
+                ctx.result(registry.scrape("application/openmetrics-text"));
+            } else {
+                // Traditional Prometheus Text-Format 0.0.4 (Fallback)
+                ctx.contentType("text/plain; version=0.0.4; charset=utf-8");
+                ctx.result(registry.scrape("text/plain"));
+            }
+        });
+
+
     }
 }
