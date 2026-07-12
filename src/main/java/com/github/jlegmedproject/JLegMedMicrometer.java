@@ -4,6 +4,8 @@ import io.javalin.Javalin;
 import io.javalin.config.JavalinConfig;
 import io.javalin.micrometer.MicrometerPlugin;
 import io.jexxa.jlegmed.core.JLegMed;
+import io.jexxa.jlegmed.core.flowgraph.FlowGraph;
+import io.micrometer.core.instrument.FunctionCounter;
 import io.micrometer.prometheusmetrics.PrometheusConfig;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 
@@ -29,20 +31,29 @@ public final class JLegMedMicrometer
 
                 .receive(String.class).from( () -> "Hello " )
                 .and().processWith(data -> data + "World" )
-                .and().processWith(JLegMedMicrometer::incrementCounter)
                 .and().consumeWith(data -> getLogger(JLegMedMicrometer.class).info(data));
 
+        initMonitor(registry, jLegMed);
+
         jLegMed.run();
+
         app.stop();
     }
 
-    public static <T> T incrementCounter(T value)
-    {
-        var counter = registry.counter("hello.world.total");
-        counter.increment();
-        getLogger(JLegMedMicrometer.class).info("Number of greetings {}", counter.count());
-        return value;
+    private static void initMonitor(PrometheusMeterRegistry registry, JLegMed jLegMed) {
+        var flowGraphs = jLegMed.getFlowGraphs();
+        flowGraphs.forEach( flowGraphId -> initMonitor(registry, jLegMed.getFlowGraph(flowGraphId)));
     }
+
+    private static void initMonitor(PrometheusMeterRegistry registry, FlowGraph flowGraph) {
+        FunctionCounter.builder("pipe.messages.total", flowGraph, value -> value.processingStats().forwardedMessages().doubleValue())
+                .description("Gesamtzahl verarbeiteter Nachrichten")
+                .tag("graph", flowGraph.flowGraphID())
+                .tag("status", "success")
+                .register(registry);
+
+    }
+
 
     static void initJavalin(JavalinConfig config)
     {
