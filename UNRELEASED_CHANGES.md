@@ -2,6 +2,7 @@
 
 ### 🤖 Dependencies
 
+- *(CI)* Bump actions/setup-java from 5 to 6 - ([483b1e0](https://github.com/jexxa-projects/JLegMedMicrometer/commit/483b1e0c2e4ba20f37b8efd10111132e9aa88acf))
 - *(java)* Bump org.junit.jupiter:junit-jupiter-engine - ([a692cde](https://github.com/jexxa-projects/JLegMedMicrometer/commit/a692cde88f11177990ba4ed7ca8dbbdd4e056b3e))
 - *(java)* Bump org.junit.platform:junit-platform-launcher - ([ef0c2b1](https://github.com/jexxa-projects/JLegMedMicrometer/commit/ef0c2b15dcba48a28365cb6d3e8740eaeb08e3a1))
 - *(java)* Bump org.junit.jupiter:junit-jupiter-params - ([58f5f69](https://github.com/jexxa-projects/JLegMedMicrometer/commit/58f5f69ab9d49bdf5add3bf335cf8e4a79d973e4))
